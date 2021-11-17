@@ -1,6 +1,7 @@
-import param_config
+import param_config as cfg
 import argparse
 import os
+from AdvCam_attack import attack
 
 parser = argparse.ArgumentParser()
 
@@ -32,7 +33,7 @@ parser.add_argument("--content_weight", dest='content_weight', nargs='?', type=f
                     help="weight of content loss", default=5e0)
 parser.add_argument("--style_weight", dest='style_weight', nargs='?', type=float,
                     help="weight of style loss", default=1e2)
-parser.add_argument("--tv_weight", dest='tv_weight', nargs='?', type=float,
+parser.add_argument("--sm_weight", dest='sm_weight', nargs='?', type=float,
                     help="weight of total variational loss", default=1e-3)
 parser.add_argument("--attack_weight", dest='attack_weight', nargs='?', type=float,
                     help="weight of attack loss", default=5e3)
@@ -51,14 +52,15 @@ parser.add_argument("--cross_class", dest='cross_class', nargs='?', type=bool,
 parser.add_argument("--test_mode", dest='test_mode', nargs='?',
                     help="content/tv/affine/all", default='all')
 
-
 args = parser.parse_args()
 
 
-
 if __name__ == "__main__":
-    config = param_config.Config(args)
+    config = cfg.Config(args)
     for content_path in config.get_contents():
-        config.set_paths(args,content_path.split(os.path.sep)[-1])
-        print("?")
+        config.set_paths(args, content_path.split(os.path.sep)[-1])
 
+        for num in (0,1000):
+            cfg.current_attack_weight = num
+            attack()
+        print("?")
