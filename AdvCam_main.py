@@ -13,12 +13,10 @@ parser.add_argument("--content_seg_path", dest='content_seg_path', nargs='?',
                     help="Path to the style segmentation", default='')
 parser.add_argument("--style_seg_path", dest='style_seg_path', nargs='?',
                     help="Path to the style segmentation", default='')
-parser.add_argument("--background_path", dest='background_path', nargs='?',
-                    help="Path to init image", default='')
+parser.add_argument("--background_path", dest='background', nargs='?',
+                    help="Path to init image", default='traffic')
 parser.add_argument("--result_dir", dest='result_dir', nargs='?',
                     help='Path to save the results', default='')
-parser.add_argument("--serial", dest='serial', nargs='?',
-                    help='Path to save the serial out_iter_X.png', default='')
 
 # Training Optimizer Options
 parser.add_argument("--max_iter", dest='max_iter', nargs='?', type=int,
@@ -39,14 +37,12 @@ parser.add_argument("--attack_weight", dest='attack_weight', nargs='?', type=flo
                     help="weight of attack loss", default=5e3)
 
 # Attack Options
-parser.add_argument("--targeted_attack", dest='targeted_attack', nargs='?', type=int,
+parser.add_argument("--targeted_attack", dest='targeted', nargs='?', type=int,
                     help="if True, targeted attack", default=1)
-parser.add_argument("--target_label", dest='target_label', nargs='?', type=int,
+parser.add_argument("--target_label", dest='target', nargs='?', type=int,
                     help="The target label for target attack", default=184)
 parser.add_argument("--true_label", dest='true_label', nargs='?', type=int,
                     help="The target label for target attack", default=8)
-parser.add_argument("--cross_class", dest='cross_class', nargs='?', type=bool,
-                    help="if True, apply photostyle transfer attack between different class", default=False)
 
 # test mode
 parser.add_argument("--test_mode", dest='test_mode', nargs='?',

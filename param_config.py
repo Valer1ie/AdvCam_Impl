@@ -10,6 +10,12 @@ current_back_ground = ''
 current_attack_weight = 0
 true_label = 0
 sm_weight = 0
+attack_weight = 0
+targeted = True
+target = 0
+max_iter = 0
+learning_rate = 1000
+save_iter = 1
 
 
 class Config:
@@ -24,7 +30,22 @@ class Config:
         if not os.path.exists(self.result_dir):
             os.mkdir(self.result_dir)
         self.content_seg_path = os.path.join(root_dir, attack_data_dir, 'content-mask')
-        self.bg_path = os.path.join(root_dir,attack_data_dir, args.content + '_bg')
+        global sm_weight
+        global attack_weight
+        global target
+        global targeted
+        global max_iter
+        global learning_rate
+        global save_iter
+        global current_back_ground
+        current_back_ground = os.path.join(root_dir, attack_data_dir, 'background', args.background + '_bg')
+        save_iter = args.save_iter
+        learning_rate = args.learning_rate
+        max_iter = args.max_iter
+        target = args.target
+        targeted = args.targeted == 1
+        sm_weight = args.sm_weight
+        attack_weight = args.attack_weight
 
     def get_contents(self):
         contents = os.listdir(self.content_dir)
@@ -36,9 +57,8 @@ class Config:
         global current_img_path
         global current_result_dir
         global current_style_image_path
-        global current_back_ground
-        global sm_weight
-        sm_weight = args.sm_weight
+
+
         content_not_jpg = content_name.split('.')[0]
         current_img_path = os.path.join(self.content_dir, content_name)
         current_seg_path = os.path.join(self.content_seg_path, content_name)
