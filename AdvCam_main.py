@@ -6,9 +6,9 @@ from AdvCam_attack import attack
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--content", dest='content', nargs='?',
-                    help="Path to the content image", default='')
+                    help="Path to the content image", default='stop-sign')
 parser.add_argument("--style_content", dest='style_content', nargs='?',
-                    help="Path to the style image", default='')
+                    help="Path to the style image", default='stop-sign')
 parser.add_argument("--content_seg_path", dest='content_seg_path', nargs='?',
                     help="Path to the style segmentation", default='')
 parser.add_argument("--style_seg_path", dest='style_seg_path', nargs='?',
@@ -16,8 +16,7 @@ parser.add_argument("--style_seg_path", dest='style_seg_path', nargs='?',
 parser.add_argument("--background_path", dest='background', nargs='?',
                     help="Path to init image", default='traffic')
 parser.add_argument("--result_dir", dest='result_dir', nargs='?',
-                    help='Path to save the results', default='')
-
+                    help='Path to save the results', default='stop-sign-lalala')
 # Training Optimizer Options
 parser.add_argument("--max_iter", dest='max_iter', nargs='?', type=int,
                     help='maximum image iteration', default=4000)
