@@ -9,6 +9,7 @@ from Camouflage_attack import Camouflage
 import os
 
 
+
 def load_imgs(target_size=(400, 400)):
     _content_img = np.array(Image.open(cfg.current_img_path).convert("RGB").resize(target_size), dtype=np.float32)
     content_height, content_width = _content_img.shape[0], _content_img.shape[1]
@@ -148,7 +149,7 @@ def compute_style_loss(all_layer_names, img_style_layers_conv, style_img_style_c
                     diff_style_sum = tf.reduce_mean(
                         tf.squared_difference(gram_matrix_const, gram_matrix_variable)) * content_mask_mean
                     style_layer_loss += diff_style_sum
-                loss_styles.append(style_layer_loss * cfg.current_attack_weight)
+                loss_styles.append(style_layer_loss * cfg.style_weight)
     return loss_styles
 
 
@@ -231,7 +232,7 @@ def attack():
             content_layer = vgg_var.conv4_2
 
             lost_content = tf.reduce_mean(
-                tf.squared_difference(content_layer_const, content_layer)) * cfg.current_attack_weight
+                tf.squared_difference(content_layer_const, content_layer)) * cfg.content_weight
             all_names = vgg_var.get_all_layers()
             all_names = [layer.name for layer in all_names]
             lost_style_list = compute_style_loss(all_names, img_style_layers_conv, style_img_style_layers, style_layers,
@@ -270,9 +271,9 @@ def attack():
                     ],
                     feed_dict={camouflage.background: camouflage.get_random_background(content_height, content_width)})
                 _pred = np.argmax(_probability)
-                print('Current Iteration: {} in {} Iterations\n'.format(i, cfg.max_iter + 1))
-                print('\tStyle loss: {}\tContent loss: {}\tSmooth loss: {}\tTotal loss: {}\tCurrent prediction: {}'
-                      .format(_style_loss, _loss_content, _loss_smooth, _attack_loss, _total_loss, pred))
+                print('Current Iteration: {} in {} Iterations\n'.format(i, cfg.max_iter))
+                print('\tStyle loss: {}\n\tContent loss: {}\n\tSmooth loss: {}\n\tAttack loss: {}\n\tTotal loss: {}\n\tCurrent prediction: {} '
+                      .format(_style_loss, _loss_content, _loss_smooth, _attack_loss, _total_loss, _pred))
                 save_valid_result(i, _pred, _out_img)
 
     sess.close()
