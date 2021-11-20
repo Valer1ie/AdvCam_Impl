@@ -34,8 +34,8 @@ def compute_transform_vec(min_scale, width, maxrotation):
     x_center_delta = x_center - x_center_shift
     y_center_delta = y_center - y_center_shift  # 不进行平移的偏移量
 
-    a1, a2 = rotation_matrix[0]
-    b1, b2 = rotation_matrix[1]
+    a1, a2 = scaled_matrix[0]
+    b1, b2 = scaled_matrix[1]
     a3 = x_center_delta - (x_shift / (im_scale * 2))
     b3 = y_center_delta - (y_shift / (im_scale * 2))
 

@@ -9,6 +9,8 @@ from Camouflage_attack import Camouflage
 import os
 
 
+# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 
 def load_imgs(target_size=(400, 400)):
     _content_img = np.array(Image.open(cfg.current_img_path).convert("RGB").resize(target_size), dtype=np.float32)
