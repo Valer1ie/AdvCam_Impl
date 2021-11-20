@@ -158,15 +158,15 @@ def compute_style_loss(all_layer_names, img_style_layers_conv, style_img_style_c
 def get_smooth_loss(output):
     sm_loss = tf.reduce_sum(
         (output[:, :-1, :-1, :] - output[:, :-1, 1:, :]) * (output[:, :-1, :-1, :] - output[:, :-1, 1:, :])
-        + (output[:, :-1, :-1, :] - output[:, 1:, 1:, :]) * (output[:, :-1, :-1, :] - output[:, 1:, 1:, :]))
+        + (output[:, :-1, :-1, :] - output[:, 1:, :-1, :]) * (output[:, :-1, :-1, :] - output[:, 1:, :-1, :])) / 2
     return sm_loss * cfg.sm_weight
 
 
 def get_attack_loss(pred, orig):
     targeted = cfg.targeted
     balance = 5
-    orig = np.eye(1000)[orig]  # one_hot
-    loss_1 = -1 * tf.nn.softmax_cross_entropy_with_logits_v2(labels=orig, logits=pred)
+    orig_pred = np.eye(1000)[orig]  # one_hot
+    loss_1 = -1 * tf.nn.softmax_cross_entropy_with_logits_v2(labels=orig_pred, logits=pred)
     if targeted:
         target = cfg.target
         target = np.eye(1000)[target]
@@ -265,17 +265,17 @@ def attack():
 
             sess.run(tf.global_variables_initializer())
 
-            for i in range(0, cfg.max_iter + 1):
-                _, _loss_content, _style_loss, _loss_smooth, _attack_loss, _total_loss, _out_img, _probability = sess.run(
-                    [
-                        train_operation, lost_content, style_loss, smooth_loss, attack_loss, total_loss,
-                        transformed_img, vgg_attack.prob
-                    ],
-                    feed_dict={camouflage.background: camouflage.get_random_background(content_height, content_width)})
-                _pred = np.argmax(_probability)
-                print('Current Iteration: {} in {} Iterations\n'.format(i, cfg.max_iter))
-                print('\tStyle loss: {}\n\tContent loss: {}\n\tSmooth loss: {}\n\tAttack loss: {}\n\tTotal loss: {}\n\tCurrent prediction: {} '
-                      .format(_style_loss, _loss_content, _loss_smooth, _attack_loss, _total_loss, _pred))
-                save_valid_result(i, _pred, _out_img)
+        for i in range(0, cfg.max_iter + 1):
+            _, _loss_content, _style_loss, _loss_smooth, _attack_loss, _total_loss, _out_img, _probability = sess.run(
+                [
+                    train_operation, lost_content, style_loss, smooth_loss, attack_loss, total_loss,
+                    transformed_img, vgg_attack.prob
+                ],
+                feed_dict={camouflage.background: camouflage.get_random_background(content_height, content_width)})
+            _pred = np.argmax(_probability)
+            print('Current Iteration: {} in {} Iterations\n'.format(i, cfg.max_iter))
+            print('\tStyle loss: {}\n\tContent loss: {}\n\tSmooth loss: {}\n\tAttack loss: {}\n\tTotal loss: {}\n\tCurrent prediction: {} '
+                  .format(_style_loss, _loss_content, _loss_smooth, _attack_loss, _total_loss, _pred))
+            save_valid_result(i, _pred, _out_img)
 
     sess.close()
