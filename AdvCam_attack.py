@@ -9,7 +9,7 @@ from Camouflage_attack import Camouflage
 import os
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 
 
 def load_imgs(target_size=(400, 400)):

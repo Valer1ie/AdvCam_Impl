@@ -47,15 +47,21 @@ parser.add_argument("--true_label", dest='true_label', nargs='?', type=int,
 parser.add_argument("--test_mode", dest='test_mode', nargs='?',
                     help="content/tv/affine/all", default='all')
 
+# cpu/gpu
+parser.add_argument("--p", dest='processor', nargs="?", type=int,
+                    help="type 0 for cpu, type 1 for gpu, default 1", default=1)
+
 args = parser.parse_args()
 
+if args.processor == 0:
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 if __name__ == "__main__":
     config = cfg.Config(args)
     for content_path in config.get_contents():
         config.set_paths(args, content_path.split(os.path.sep)[-1])
 
-        for num in (0,1000):
+        for num in (0, 1000):
             cfg.current_attack_weight = num
             attack()
-        print("?")
+        print("end all process")
