@@ -6,8 +6,6 @@ import os
 from PIL import Image
 
 
-
-
 def compute_transform_vec(min_scale, width, maxrotation):
     im_scale = np.random.uniform(low=min_scale, high=0.6)
 
@@ -17,10 +15,10 @@ def compute_transform_vec(min_scale, width, maxrotation):
 
     rotation_deg = np.random.uniform(-maxrotation, maxrotation)
 
-    rotation = -math.pi / 2 * float(rotation_deg) / 90.
+    rotation = (math.pi / 2) * float(rotation_deg) / 90.
     rotation_matrix = np.array([
-        [math.cos(rotation), -math.sin(rotation)],
-        [math.sin(rotation), math.cos(rotation)]
+        [math.cos(-rotation), -math.sin(-rotation)],
+        [math.sin(-rotation), math.cos(-rotation)]
     ])
 
     inv_scale = 1. / im_scale
@@ -29,7 +27,7 @@ def compute_transform_vec(min_scale, width, maxrotation):
     x_center = float(width) / 2
     y_center = float(width) / 2
 
-    x_center_shift, y_center_shift = np.matmul(scaled_matrix, [x_center, y_center])
+    x_center_shift, y_center_shift = np.matmul(scaled_matrix, np.array([x_center, y_center]), )
 
     x_center_delta = x_center - x_center_shift
     y_center_delta = y_center - y_center_shift  # 不进行平移的偏移量
@@ -43,8 +41,9 @@ def compute_transform_vec(min_scale, width, maxrotation):
 
 
 class Camouflage:
-    def __init__(self, content_mask, content_img, input_img):
-        content_height, content_width = content_img.shape[0], content_img.shape[1]
+    def __init__(self, content_mask, content_img, input_img, content_size):
+        content_width, content_height = content_size
+        # content_height, content_width = content_img.shape[0], content_img.shape[1]
         tf_mask = tf.constant(content_mask)
         tf_mask_reverse = tf.constant(1 - content_mask)
         content_img_masked = tf.multiply(tf.constant(content_img), tf_mask_reverse)
@@ -54,8 +53,9 @@ class Camouflage:
         self.background = tf.placeholder(tf.float32, (None, content_height, content_width, 3))
         self.img_with_background = self.get_img_with_background(tf_mask, content_width)
         self.resized_img = tf.image.resize_images(self.img_with_background, (224, 224))
+        self.bg_dir = cfg.current_back_ground
 
-    def get_img_with_background(self, tf_mask, width, min_scale=0.4, max_rotation=25):
+    def get_img_with_background(self, tf_mask, width, min_scale=0.6, max_rotation=25):
         bg = tf.squeeze(self.background, [0])
         adv_img = tf.squeeze(self.transformed_img, [0])
         shift_vector = tf.py_func(compute_transform_vec, [min_scale, width, max_rotation], tf.float32)
@@ -67,11 +67,11 @@ class Camouflage:
 
         color_shift = input_with_back_ground + input_with_back_ground * tf.constant(np.random.uniform(-0.3, 0.3))
         color_shift = tf.expand_dims(color_shift, 0)
-
-        return tf.clip_by_value(color_shift, 0.0, 255.0)
+        clip_img = tf.clip_by_value(color_shift, 0.0, 255.0)
+        return clip_img
 
     def get_random_background(self, height, width):
-        files = os.listdir(cfg.current_back_ground)
+        files = os.listdir(self.bg_dir)
         rand_n = np.random.randint(0, len(files))
         file_name = os.path.join(cfg.current_back_ground, files[rand_n])
         bg = np.array(Image.open(file_name).convert("RGB").resize((height, width)), dtype=np.float32)

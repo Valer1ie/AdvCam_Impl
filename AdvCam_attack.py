@@ -7,9 +7,7 @@ from CNN.vgg import Vgg19
 from functools import reduce
 from Camouflage_attack import Camouflage
 import os
-
-
-
+# from Camouflage_attack import Physical_Adaptor
 
 
 def load_imgs(target_size=(400, 400)):
@@ -172,7 +170,8 @@ def get_attack_loss(pred, orig):
         target = np.eye(1000)[target]
 
         loss_2 = tf.nn.softmax_cross_entropy_with_logits_v2(labels=target, logits=pred)
-        return tf.reduce_sum(balance * loss_2 + loss_1) * cfg.current_attack_weight
+        loss_attack = tf.reduce_sum(balance * loss_2 + loss_1) * cfg.current_attack_weight
+        return loss_attack
     else:
         return loss_1 * cfg.current_attack_weight
 
@@ -207,8 +206,6 @@ def attack():
             resized_content_img = tf.image.resize_images(tf.constant(content_img), (224, 224))
             vgg_style.fprop(resized_content_img)
 
-            sess.run(tf.global_variables_initializer())
-            sess.run(tf.local_variables_initializer())
             probability = sess.run(vgg_style.prob)  # softmax 层输出结果
 
             cfg.true_label = np.argmax(probability)  # 图像真正的分类
@@ -245,20 +242,20 @@ def attack():
         with tf.name_scope("attack"):
             vgg_attack = Vgg19()
             content_width, content_height = content_img.shape[1], content_img.shape[0]
-
-            camouflage = Camouflage(content_mask_s, content_img, tf_input_img)
-
+            content_size = [content_width, content_height]
+            camouflage = Camouflage(content_mask_s, content_img, tf_input_img, content_size)
+            # camouflage = Physical_Adaptor(content_mask_s, content_img, tf_input_img, content_width, content_height)
             vgg_attack.fprop(camouflage.resized_img)
             pred = vgg_attack.logits
             attack_loss = get_attack_loss(pred, cfg.true_label)
             transformed_img = tf.squeeze(camouflage.transformed_img, [0])
+            # transformed_img = tf.squeeze(camouflage.transformed_image, [0])
 
             smooth_loss = get_smooth_loss(tf_input_img)
 
             total_loss = smooth_loss + lost_content + style_loss + attack_loss
 
-            optimizer = tf.train.AdamOptimizer(learning_rate=cfg.learning_rate, beta1=0.9, beta2=0.999,
-                                               use_locking=False, epsilon=1e-08)
+            optimizer = tf.train.AdamOptimizer(learning_rate=cfg.learning_rate, beta1=0.9, beta2=0.999, epsilon=1e-08)
             grads = optimizer.compute_gradients(total_loss, [tf_input_img])
 
             train_operation = optimizer.apply_gradients(grads)
@@ -271,15 +268,21 @@ def attack():
                     train_operation, lost_content, lost_style_list, smooth_loss, attack_loss, total_loss,
                     transformed_img, vgg_attack.prob
                 ],
-                feed_dict={camouflage.background: camouflage.get_random_background(content_width, content_height)})
+                feed_dict={camouflage.background: camouflage.get_random_background(content_width, content_height)}
+                # feed_dict={camouflage.background: camouflage.select_random_background(content_width, content_height)}
+
+            )
             _pred = np.argmax(_probability)
-            for j, style_loss_ in enumerate(_style_loss_list):
-                print('\tStyle {} loss: {}'.format(j + 1, style_loss_))
 
             _style_loss = reduce(lambda x, y: x + y, _style_loss_list)
             print('Current Iteration: {} in {} Iterations\n'.format(i, cfg.max_iter))
-            print('\tStyle loss: {}\n\tContent loss: {}\n\tSmooth loss: {}\n\tAttack loss: {}\n\tTotal loss: {}\n\tCurrent prediction: {} '
-                  .format(_style_loss, _loss_content, _loss_smooth, _attack_loss, _total_loss, _pred))
+            for j, style_loss_ in enumerate(_style_loss_list):
+                print('\tStyle {} loss: {}'.format(j + 1, style_loss_))
+            print("")
+            print(
+                '\tStyle loss: {}\n\tContent loss: {}\n\tSmooth loss: {}\n\tAttack loss: {}\n\tTotal loss: {}\n\tCurrent prediction: {} '
+                .format(_style_loss, _loss_content, _loss_smooth, _attack_loss, _total_loss, _pred))
+
             save_valid_result(i, _pred, _out_img)
 
     sess.close()

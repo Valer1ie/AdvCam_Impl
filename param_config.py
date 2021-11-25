@@ -7,7 +7,6 @@ current_result_dir = ''
 current_style_image_path = ''
 current_seg_path = ''
 current_back_ground = ''
-true_label = 0
 sm_weight = 0
 current_attack_weight = 0
 content_weight = 0
@@ -17,6 +16,7 @@ target = 0
 max_iter = 0
 learning_rate = 1000
 save_iter = 1
+true_label = 0
 
 
 class Config:
@@ -50,7 +50,6 @@ class Config:
         targeted = args.targeted == 1
         sm_weight = args.sm_weight
 
-
     def get_contents(self):
         contents = os.listdir(self.content_dir)
         return [os.path.join(self.content_dir, x) for x in contents]
@@ -66,8 +65,12 @@ class Config:
         current_seg_path = os.path.join(self.content_seg_path, content_name)
         current_style_seg_path = os.path.join(self.style_seg_path, content_name)
         current_style_image_path = os.path.join(self.style_image_path, content_name)
-        current_result_dir = os.path.join(self.result_dir, content_not_jpg,
-                                          '_' + str(args.attack_weight) + '_' + content_not_jpg)
+        res_name = ""
+        if targeted:
+            res_name = str(target) + '_' + str(args.attack_weight) + '_' + content_not_jpg
+        else:
+            res_name = 'untargeted_' + str(args.attack_weight) + '_' + content_not_jpg
+        current_result_dir = os.path.join(self.result_dir, content_not_jpg, res_name)
         if not os.path.exists(os.path.join(self.result_dir, content_not_jpg)):
             os.mkdir(os.path.join(self.result_dir, content_not_jpg))
         if not os.path.exists(current_result_dir):
