@@ -172,9 +172,9 @@ def get_attack_loss(pred, orig):
         target = np.eye(1000)[target]
 
         loss_2 = tf.nn.softmax_cross_entropy_with_logits_v2(labels=target, logits=pred)
-        return tf.reduce_sum(balance * loss_2 + loss_1) * cfg.attack_weight
+        return tf.reduce_sum(balance * loss_2 + loss_1) * cfg.current_attack_weight
     else:
-        return loss_1 * cfg.attack_weight
+        return loss_1 * cfg.current_attack_weight
 
 
 def save_valid_result(iterator, pred, result):
@@ -244,7 +244,7 @@ def attack():
 
         with tf.name_scope("attack"):
             vgg_attack = Vgg19()
-            content_width, content_height = content_img.shape[0], content_img.shape[1]
+            content_width, content_height = content_img.shape[1], content_img.shape[0]
 
             camouflage = Camouflage(content_mask_s, content_img, tf_input_img)
 
@@ -271,7 +271,7 @@ def attack():
                     train_operation, lost_content, style_loss, smooth_loss, attack_loss, total_loss,
                     transformed_img, vgg_attack.prob
                 ],
-                feed_dict={camouflage.background: camouflage.get_random_background(content_height, content_width)})
+                feed_dict={camouflage.background: camouflage.get_random_background(content_width, content_height)})
             _pred = np.argmax(_probability)
             print('Current Iteration: {} in {} Iterations\n'.format(i, cfg.max_iter))
             print('\tStyle loss: {}\n\tContent loss: {}\n\tSmooth loss: {}\n\tAttack loss: {}\n\tTotal loss: {}\n\tCurrent prediction: {} '

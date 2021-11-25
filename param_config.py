@@ -9,7 +9,7 @@ current_seg_path = ''
 current_back_ground = ''
 true_label = 0
 sm_weight = 0
-attack_weight = 0
+current_attack_weight = 0
 content_weight = 0
 style_weight = 0
 targeted = True
@@ -32,7 +32,7 @@ class Config:
             os.mkdir(self.result_dir)
         self.content_seg_path = os.path.join(root_dir, attack_data_dir, 'content-mask')
         global sm_weight
-        global attack_weight
+        global current_attack_weight
         global content_weight
         global style_weight
         global target
@@ -50,7 +50,7 @@ class Config:
         target = args.target
         targeted = args.targeted == 1
         sm_weight = args.sm_weight
-        attack_weight = args.attack_weight
+        current_attack_weight = args.attack_weight
 
     def get_contents(self):
         contents = os.listdir(self.content_dir)
