@@ -9,7 +9,7 @@ from Camouflage_attack import Camouflage
 import os
 
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 
 def load_imgs(target_size=(400, 400)):
@@ -259,7 +259,7 @@ def attack():
 
             optimizer = tf.train.AdamOptimizer(learning_rate=cfg.learning_rate, beta1=0.9, beta2=0.999,
                                                use_locking=False, epsilon=1e-08)
-            grads = optimizer.compute_gradients(total_loss, tf_input_img)
+            grads = optimizer.compute_gradients(total_loss, [tf_input_img])
 
             train_operation = optimizer.apply_gradients(grads)
 
