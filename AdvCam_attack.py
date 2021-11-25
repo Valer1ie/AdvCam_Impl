@@ -266,13 +266,17 @@ def attack():
             sess.run(tf.global_variables_initializer())
 
         for i in range(0, cfg.max_iter + 1):
-            _, _loss_content, _style_loss, _loss_smooth, _attack_loss, _total_loss, _out_img, _probability = sess.run(
+            _, _loss_content, _style_loss_list, _loss_smooth, _attack_loss, _total_loss, _out_img, _probability = sess.run(
                 [
-                    train_operation, lost_content, style_loss, smooth_loss, attack_loss, total_loss,
+                    train_operation, lost_content, lost_style_list, smooth_loss, attack_loss, total_loss,
                     transformed_img, vgg_attack.prob
                 ],
                 feed_dict={camouflage.background: camouflage.get_random_background(content_width, content_height)})
             _pred = np.argmax(_probability)
+            for j, style_loss_ in enumerate(_style_loss_list):
+                print('\tStyle {} loss: {}'.format(j + 1, style_loss_))
+
+            _style_loss = reduce(lambda x, y: x + y, _style_loss_list)
             print('Current Iteration: {} in {} Iterations\n'.format(i, cfg.max_iter))
             print('\tStyle loss: {}\n\tContent loss: {}\n\tSmooth loss: {}\n\tAttack loss: {}\n\tTotal loss: {}\n\tCurrent prediction: {} '
                   .format(_style_loss, _loss_content, _loss_smooth, _attack_loss, _total_loss, _pred))
