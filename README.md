@@ -27,7 +27,7 @@ python环境：
 
 目录
 
-|--physical-attack-data<br/>|	|--background <br/>|	|--content<br/>|	|--content-mask<br/>|	|--style<br/>|	|--style-mask<br/>|--CNN<br/>|	|--vgg19.py<br/>|	|--VGG.npy
+|--physical-attack-data<br/>|	|--background <br/>|	|--content<br/>|	|--content-mask<br/>|	|--style<br/>|	|--style-mask<br/>|--CNN<br/>|	|--vgg19.py<br/>|	|--VGG.npy<br/>|--attack_result
 
 ## 输入说明
 
