@@ -67,9 +67,9 @@ class Config:
         current_style_image_path = os.path.join(self.style_image_path, content_name)
         res_name = ""
         if targeted:
-            res_name = str(target) + '_' + str(args.attack_weight) + '_' + content_not_jpg
+            res_name = str(target) + '_' + str(current_attack_weight) + '_' + content_not_jpg
         else:
-            res_name = 'untargeted_' + str(args.attack_weight) + '_' + content_not_jpg
+            res_name = 'untargeted_' + str(current_attack_weight) + '_' + content_not_jpg
         current_result_dir = os.path.join(self.result_dir, content_not_jpg, res_name)
         if not os.path.exists(os.path.join(self.result_dir, content_not_jpg)):
             os.mkdir(os.path.join(self.result_dir, content_not_jpg))
