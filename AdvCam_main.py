@@ -59,7 +59,7 @@ if args.processor == 0:
 if __name__ == "__main__":
     config = cfg.Config(args)
     for content_path in config.get_contents():
-        for num in (0, 1000):
+        for num in range(0, 1000):
             cfg.current_attack_weight = num
             config.set_paths(args, content_path.split(os.path.sep)[-1])
             attack()
