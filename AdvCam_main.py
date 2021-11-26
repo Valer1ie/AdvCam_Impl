@@ -39,7 +39,7 @@ parser.add_argument("--attack_weight", dest='attack_weight', nargs='?', type=flo
 parser.add_argument("--targeted_attack", dest='targeted', nargs='?', type=int,
                     help="if True, targeted attack", default=1)
 parser.add_argument("--target_label", dest='target', nargs='?', type=int,
-                    help="The target label for target attack", default=184)
+                    help="The target label for target attack", default=424)
 parser.add_argument("--true_label", dest='true_label', nargs='?', type=int,
                     help="The target label for target attack", default=8)
 
@@ -57,11 +57,10 @@ if args.processor == 0:
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 if __name__ == "__main__":
-    args.target = 424
     config = cfg.Config(args)
     for content_path in config.get_contents():
-        config.set_paths(args, content_path.split(os.path.sep)[-1])
-        for num in (999, 1000):
+        for num in (0, 1000):
             cfg.current_attack_weight = num
+            config.set_paths(args, content_path.split(os.path.sep)[-1])
             attack()
         print("end all process")

@@ -155,8 +155,7 @@ def compute_style_loss(all_layer_names, img_style_layers_conv, style_img_style_c
 
 def get_smooth_loss(output):
     sm_loss = tf.reduce_sum(
-        (output[:, :-1, :-1, :] - output[:, :-1, 1:, :]) * (output[:, :-1, :-1, :] - output[:, :-1, 1:, :])
-        + (output[:, :-1, :-1, :] - output[:, 1:, :-1, :]) * (output[:, :-1, :-1, :] - output[:, 1:, :-1, :])) / 2
+        np.square(output[:, :-1, :-1, :] - output[:, :-1, 1:, :]) + np.square(output[:, :-1, :-1, :] - output[:, 1:, :-1, :])) / 2
     return sm_loss * cfg.sm_weight
 
 
