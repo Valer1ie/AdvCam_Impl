@@ -2,6 +2,10 @@
 
 本次复现源码[参照](https://github.com/RjDuan/AdvCam-Hide-Adv-with-Natural-Styles)
 
+[视频讲解及ppt](https://pan.baidu.com/s/1t1oPbQMWha0zr6GoB7neZQ)
+
+提取码 5467
+
 ## 环境要求：
 
 **平台**：windows10
