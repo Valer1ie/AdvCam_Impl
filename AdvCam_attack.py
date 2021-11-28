@@ -54,9 +54,9 @@ def load_imgs(target_size=(400, 400)):
 def gram_matrix(activations):
     height = tf.shape(activations)[1]
     width = tf.shape(activations)[2]
-    color = tf.shape(activations)[3]
+    ch = tf.shape(activations)[3]
     gram = tf.transpose(activations, [0, 3, 1, 2])
-    gram = tf.reshape(gram, [color, width * height])
+    gram = tf.reshape(gram, [ch, width * height])
     gram = tf.matmul(gram, gram, transpose_b=True)
     return gram
 
@@ -231,6 +231,7 @@ def attack():
 
             lost_content = tf.reduce_mean(
                 tf.squared_difference(content_layer_const, content_layer)) * cfg.content_weight
+            smooth_loss = get_smooth_loss(tf_input_img)
             all_names = vgg_var.get_all_layers()
             all_names = [layer.name for layer in all_names]
             lost_style_list = compute_style_loss(all_names, img_style_layers_conv, style_img_style_layers, style_layers,
@@ -243,14 +244,10 @@ def attack():
             content_width, content_height = content_img.shape[1], content_img.shape[0]
             content_size = [content_width, content_height]
             camouflage = Camouflage(content_mask_s, content_img, tf_input_img, content_size)
-            # camouflage = Physical_Adaptor(content_mask_s, content_img, tf_input_img, content_width, content_height)
             vgg_attack.fprop(camouflage.resized_img)
             pred = vgg_attack.logits
             attack_loss = get_attack_loss(pred, cfg.true_label)
             transformed_img = tf.squeeze(camouflage.transformed_img, [0])
-            # transformed_img = tf.squeeze(camouflage.transformed_image, [0])
-
-            smooth_loss = get_smooth_loss(tf_input_img)
 
             total_loss = smooth_loss + lost_content + style_loss + attack_loss
 
@@ -268,7 +265,6 @@ def attack():
                     transformed_img, vgg_attack.prob
                 ],
                 feed_dict={camouflage.background: camouflage.get_random_background(content_width, content_height)}
-                # feed_dict={camouflage.background: camouflage.select_random_background(content_width, content_height)}
 
             )
             _pred = np.argmax(_probability)

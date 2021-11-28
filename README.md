@@ -42,7 +42,7 @@ python环境：
 
 #### **总体思路**：
 
-项目的关键在于构建损失函数的计算和现实环境适应。论文中损失函数由Style loss, Content loss, Smoothness loss 以及 Attack loss 组成。下面将分别介绍损失函数的计算方式以及实现。
+项目的关键在于构建损失函数的计算。论文中损失函数由Style loss, Content loss, Smoothness loss 以及 Attack loss 组成。下面将分别介绍损失函数的计算方式以及实现。
 
 ##### 损失函数
 
@@ -121,6 +121,10 @@ for content_mask, style_mask in zip(content_masks, style_masks):
     style_layer_loss += diff_style_sum
 ```
 
+**为什么用gram矩阵**
+
+因为gram矩阵可以表示featuremap之间的关系，而低层featuremap可以表示纹理信息，纹理的组合可以表示图片的风格，所以用gram矩阵的差异来表示风格的差异。
+
 **Content loss**
 
 vgg19中最可以代表图像Content特征的卷积层为conv4_2，
@@ -128,6 +132,10 @@ vgg19中最可以代表图像Content特征的卷积层为conv4_2，
 ![layers](README.assets/image-20211126230551774.png)
 
 可以直接将攻击后图像与原图像的conv4_2层处理后的特征图形进行距离计算得到Content loss。
+
+**为什么Content loss 不用gram矩阵**
+
+因为Content loss不在于图片的局部性特征，而是图片的概括性特征，且主要是形状特征，所以不需要各个特征之间的关联，更重要的是对应位置的概括性特征是否保持，所以需要直接计算对应featuremap的差异。
 
 ```python
  lost_content = tf.reduce_mean(
@@ -145,7 +153,7 @@ sm_loss = tf.reduce_sum(
 
 **Attack loss**
 
-攻击损失即计算攻击后的logits层与原图像的差异，按文中描述分为两种方式
+攻击损失即计算扰动以及适应性变换后的logits层与原图像的差异，按文中描述分为两种方式
 
 - 有目标的攻击：计算原图像标签与攻击后的logits的交叉熵对损失的贡献为负，目标标签与攻击后的交叉熵对损失贡献为正
 - 无目标的攻击：只包含原图像与攻击后logits的交叉熵损失负向贡献部分
@@ -153,7 +161,7 @@ sm_loss = tf.reduce_sum(
 ```python
   targeted = cfg.targeted
     balance = 5
-    orig_pred = np.eye(1000)[orig]  # eye操作升维得到对家矩阵，取index=orig得到与1*1000且index=orig为1的向量，即与logits维度相同
+    orig_pred = np.eye(1000)[orig]  # eye操作升维得到对家矩阵，取index=orig得到与1*1000且index=orig为1的向量，便于计算交叉熵
     loss_1 = -1 * tf.nn.softmax_cross_entropy_with_logits_v2(labels=orig_pred, logits=pred) # 计算交叉熵，下同
     if targeted:
         target = cfg.target
@@ -222,19 +230,4 @@ sm_loss = tf.reduce_sum(
     clip_img = tf.clip_by_value(color_shift, 0.0, 255.0) # 颜色校正
 ```
 
-
-
-#### AdvCam_main.py
-
-负责参数的解释，并将参数传入`param_config.py`进行解析，之后将攻击权重设置为0-1000分别进行对抗生成。
-
-```python
- for num in (0, 1000):
-        cfg.current_attack_weight = num 	# cfg为param_config定义类生成的对象
-        attack() 							# attack为核心对抗算法
-```
-
-#### AdvCam_attack.py
-
-该文件的工作为除攻击损失计算之外所有的tensorflow图结构构建，并输出运行结果，保存代码
 
