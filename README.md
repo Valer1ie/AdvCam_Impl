@@ -258,5 +258,5 @@ succeed为成功生成目标标签的图片个数，not_succeed为生成目标�
 
 2. 进行了目标标签为山羊（原样本stop-sign）的对抗生成实验（对应结果目录`attack_result/stop-sign-lalala/stop-sign/184_5000_stop-sign`，因为时间关系，只运行了权重为1和5000的实验并将结果放在一个文件夹下）。生成图片的扰动较明显，不难理解标签之间的差别也决定了生成图片的伪装性能。
 
-<img src="README.assets/image-20211130144217225.png" alt="image-20211130144217225" style="zoom:50%;" />
+<img src="README.assets/image-20211130144217225.png" alt="image-20211130144217225" style="zoom:20%;" />
 
