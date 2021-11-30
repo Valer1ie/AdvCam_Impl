@@ -42,6 +42,8 @@ parser.add_argument("--target_label", dest='target', nargs='?', type=int,
                     help="The target label for target attack", default=424)
 parser.add_argument("--true_label", dest='true_label', nargs='?', type=int,
                     help="The target label for target attack", default=8)
+parser.add_argument("--iteration", dest='iteration', nargs='?', type=bool,
+                    help='if True, traverse attack_weight from 1 to attack_weight', default=1)
 
 # test mode
 parser.add_argument("--test_mode", dest='test_mode', nargs='?',
@@ -59,7 +61,10 @@ if args.processor == 0:
 if __name__ == "__main__":
     config = cfg.Config(args)
     for content_path in config.get_contents():
-        for num in range(1, int(args.attack_weight)+1):
+        start_it = 1
+        if not args.iteration:
+            start_it = args.attack_weight
+        for num in range(start_it, int(args.attack_weight)+1):
             cfg.current_attack_weight = num
             config.set_paths(args, content_path.split(os.path.sep)[-1])
             attack()

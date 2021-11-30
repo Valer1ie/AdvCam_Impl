@@ -258,7 +258,7 @@ def attack():
 
             sess.run(tf.global_variables_initializer())
 
-        for i in range(0, cfg.max_iter + 1):
+        for i in range(1, cfg.max_iter + 1):
             _, _loss_content, _style_loss_list, _loss_smooth, _attack_loss, _total_loss, _out_img, _probability = sess.run(
                 [
                     train_operation, lost_content, lost_style_list, smooth_loss, attack_loss, total_loss,
